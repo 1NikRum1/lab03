@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 
@@ -36,24 +37,27 @@ std::vector<size_t> make_histogram(const std::vector<double>& numbers, size_t bi
 }
 
 void show_histogram_svg(const std::vector<size_t>& bins) {
+    const auto IMAGE_WIDTH = 400;
+    const auto IMAGE_HEIGHT = 300;
+    const auto TEXT_LEFT = 20;
+    const auto TEXT_BASELINE = 20;
+    const auto TEXT_HEIGHT = 30;
+    const auto BIN_HEIGHT = IMAGE_HEIGHT - TEXT_HEIGHT;
+    const auto BIN_WIDTH = IMAGE_WIDTH / bins.size();
+    const std::vector<std::string> colors = { "#000", "#f00", "#0f0", "#00f", "#ff0", "#f0f", "#0ff" };
+
+    std::ofstream svg_file("histogram.svg");
+    svg_file << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
+    svg_file << "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" << IMAGE_WIDTH << "\" height=\"" << IMAGE_HEIGHT << "\">\n";
+
     size_t max_count = *std::max_element(bins.begin(), bins.end());
-    std::vector<size_t> heights(bins.size());
     for (size_t i = 0; i < bins.size(); i++) {
-        heights[i] = MAX_ASTERISK * (static_cast<double>(bins[i]) / max_count);
+        size_t height = BIN_HEIGHT * (static_cast<double>(bins[i]) / max_count);
+        svg_file << "<rect x=\"" << i * BIN_WIDTH << "\" y=\"" << BIN_HEIGHT - height << "\" width=\"" << BIN_WIDTH << "\" height=\"" << height << "\" fill=\"" << colors[i % colors.size()] << "\" />\n";
     }
 
-    size_t max_height = *std::max_element(heights.begin(), heights.end());
-    for (size_t i = max_height; i > 0; i--) {
-        for (size_t j = 0; j < bins.size(); j++) {
-            if (heights[j] >= i) {
-                std::cout << "*";
-            }
-            else {
-                std::cout << " ";
-            }
-        }
-        std::cout << std::endl;
-    }
+    svg_file << "</svg>\n";
+    svg_file.close();
 }
 
 int main() {
