@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include "test.h"
 
 const size_t SCREEN_WIDTH = 80;
 const size_t MAX_ASTERISK = SCREEN_WIDTH - 3 - 1;
@@ -36,6 +37,39 @@ std::vector<size_t> make_histogram(const std::vector<double>& numbers, size_t bi
     return bins;
 }
 
+void show_histogram_text(const std::vector<size_t>& bins) {
+    const size_t MAX_ASTERISK = 76;
+    const size_t SCREEN_WIDTH = 80;
+    size_t max_count = *std::max_element(bins.begin(), bins.end());
+    std::vector<size_t> heights(bins.size());
+
+    if (max_count > MAX_ASTERISK) {
+        double scaling_factor = static_cast<double>(MAX_ASTERISK) / max_count;
+        for (size_t i = 0; i < bins.size(); ++i) {
+            heights[i] = bins[i] * scaling_factor;
+        }
+    }
+    else {
+        heights = bins;
+    }
+
+    for (size_t i = MAX_ASTERISK; i > 0; --i) {
+        for (size_t height : heights) {
+            if (height >= i) {
+                std::cout << "* ";
+            }
+            else {
+                std::cout << "  ";
+            }
+        }
+        std::cout << '\n';
+    }
+}
+
+
+
+
+
 void show_histogram_svg(const std::vector<size_t>& bins) {
     const auto IMAGE_WIDTH = 400;
     const auto MAX_HEIGHT = 300.0;
@@ -66,8 +100,17 @@ void show_histogram_svg(const std::vector<size_t>& bins) {
 }
 
 
+bool tests = 0;
 
-int main() {
+
+int main(int argc, char* argv[]) {
+    if (tests) {
+        test_find_minmax();
+        test_make_histogram();
+
+        return 0;
+    }
+
     size_t number_count;
     std::cout << "Enter number count: ";
     std::cin >> number_count;
@@ -76,11 +119,13 @@ int main() {
 
     size_t bin_count;
     std::cout << "Enter bin count: ";
-    std::cin >> bin_count;
+    std::cin >> bin_count; 
 
     const auto bins = make_histogram(numbers, bin_count);
+    std::cout << bins.size();
 
     show_histogram_svg(bins);
+    show_histogram_text(bins);
 
     return 0;
 }
